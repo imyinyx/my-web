@@ -1,45 +1,45 @@
-import { motion } from 'framer-motion'
-
-const portfolioItems = [
-  {
-    id: 1,
-    title: '企业级设计系统',
-    category: '设计体系',
-    description: '从0到1构建完整的Design System'
-  },
-  {
-    id: 2,
-    title: '数据可视化平台',
-    category: '前端工程',
-    description: '复杂图表与大屏交互设计'
-  },
-  {
-    id: 3,
-    title: '移动电商平台',
-    category: '产品设计',
-    description: '百万级用户移动端体验升级'
-  },
-  {
-    id: 4,
-    title: '内部工具套件',
-    category: '工具开发',
-    description: '提升团队效率的自动化工具'
-  },
-  {
-    id: 5,
-    title: '用户体验优化',
-    category: 'UX改进',
-    description: '多维度提升用户满意度'
-  },
-  {
-    id: 6,
-    title: '无障碍设计实践',
-    category: '可访问性',
-    description: '让产品服务更多人群'
-  }
-]
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { PORTFOLIO_ITEMS, ANIMATION_CONFIG } from '../config/constants'
 
 export default function PortfolioGallery() {
+  const [selectedImage, setSelectedImage] = useState(null)
+  const [selectedItem, setSelectedItem] = useState(null)
+
+  // 键盘事件处理
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedImage(null)
+        setSelectedItem(null)
+      }
+    }
+
+    if (selectedImage) {
+      document.addEventListener('keydown', handleKeyPress)
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress)
+      document.body.style.overflow = 'unset'
+    }
+  }, [selectedImage])
+
+  // 点击图片打开灯箱
+  const openLightbox = (item) => {
+    setSelectedItem(item)
+    setSelectedImage(item.fullImage)
+  }
+
+  // 关闭灯箱
+  const closeLightbox = () => {
+    setSelectedImage(null)
+    setSelectedItem(null)
+  }
+
   return (
     <section className="portfolio-gallery py-16 px-4 max-w-6xl mx-auto">
       <h2 className="text-3xl font-light text-gray-900 mb-12 text-center">
@@ -47,22 +47,119 @@ export default function PortfolioGallery() {
       </h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {portfolioItems.map((item, index) => (
+        {PORTFOLIO_ITEMS.map((item, index) => (
           <motion.div
             key={item.id}
-            className="portfolio-card bg-gray-50 p-6 rounded-lg hover:shadow-md transition-all duration-300 cursor-pointer"
+            className="portfolio-card group cursor-pointer"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            whileHover={{ scale: 1.02 }}
           >
-            <div className="w-full h-48 bg-gray-200 rounded mb-4" />
-            <h3 className="text-xl font-light text-gray-900 mb-2">{item.title}</h3>
-            <p className="text-sm text-gray-500 mb-3">{item.category}</p>
-            <p className="text-gray-600 text-sm">{item.description}</p>
+            <div 
+              className="bg-white border border-gray-100 rounded-lg p-8 shadow-sm hover:shadow-lg 
+                         hover:border-gray-200 transition-all duration-300 transform 
+                         group-hover:-translate-y-1 group-hover:bg-gray-50"
+              onClick={() => openLightbox(item)}
+            >
+              {/* 分类标签 */}
+              <div className="mb-4">
+                <span className="inline-block px-3 py-1 text-xs font-medium text-gray-600 
+                                bg-gray-100 rounded-full group-hover:bg-gray-200 
+                                transition-colors duration-300">
+                  {item.category}
+                </span>
+              </div>
+              
+              {/* 标题 */}
+              <h3 className="text-2xl font-light text-gray-900 mb-4 group-hover:text-gray-700 
+                             transition-colors duration-300 leading-tight">
+                {item.title}
+              </h3>
+              
+              {/* 描述 */}
+              <p className="text-gray-600 text-base leading-relaxed mb-6">
+                {item.description}
+              </p>
+              
+              {/* 查看详情提示 */}
+              <div className="flex items-center text-sm text-gray-400 group-hover:text-gray-600 
+                             transition-colors duration-300">
+                <span>点击查看照片</span>
+                <svg className="w-4 h-4 ml-2 transform group-hover:translate-x-1 
+                               transition-transform duration-300" fill="none" stroke="currentColor" 
+                     viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                        d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
           </motion.div>
         ))}
       </div>
+
+      {/* 灯箱模态框 */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center"
+            onClick={closeLightbox}
+          >
+            {/* 背景遮罩 */}
+            <motion.div 
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+            
+            {/* 图片容器 */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25 }}
+              className="relative max-w-4xl max-h-[90vh] mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* 关闭按钮 */}
+              <button
+                onClick={closeLightbox}
+                className="absolute -top-12 right-0 text-white hover:text-gray-300 
+                         transition-colors duration-200"
+                aria-label="关闭图片"
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                        d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              
+              {/* 图片 */}
+              <div className="relative overflow-hidden rounded-lg">
+                <img
+                  src={selectedImage}
+                  alt={selectedItem?.title}
+                  className="max-w-full max-h-[85vh] object-contain"
+                  loading="lazy"
+                />
+                
+                {/* 图片标题 */}
+                {selectedItem && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t 
+                                 from-black/70 via-black/50 to-transparent p-6">
+                    <h3 className="text-white text-lg font-light mb-1">{selectedItem.title}</h3>
+                    <p className="text-gray-200 text-sm mb-2">{selectedItem.category}</p>
+                    <p className="text-gray-300 text-xs">{selectedItem.description}</p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }

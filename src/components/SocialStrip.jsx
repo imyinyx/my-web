@@ -1,40 +1,27 @@
 import { motion } from 'framer-motion'
 import { GithubLogo, TwitterLogo, Envelope } from 'phosphor-react'
+import { SOCIAL_LINKS, ANIMATION_CONFIG } from '../config/constants'
 
-const socialLinks = [
-  { name: 'GitHub', icon: GithubLogo, url: 'https://github.com/imyinyx' },
-  { name: 'Twitter', icon: TwitterLogo, url: 'https://x.com/imyinyx' },
-  { name: 'Email', icon: Envelope, url: 'mailto:3034003373@qq.com' }
-]
+// 图标映射
+const iconMap = {
+  GithubLogo,
+  TwitterLogo,
+  Envelope
+}
 
 export default function SocialStrip() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  }
-
   return (
     <motion.section 
       className="social-strip py-8"
       initial="hidden"
       animate="visible"
-      variants={containerVariants}
+      variants={ANIMATION_CONFIG.staggerContainer}
     >
       <ul className="social-icons flex justify-center items-center gap-6">
-        {socialLinks.map((link) => {
-          const Icon = link.icon
+        {SOCIAL_LINKS.map((link) => {
+          const Icon = iconMap[link.icon]
           return (
-            <motion.li key={link.name} variants={itemVariants}>
+            <motion.li key={link.name} variants={ANIMATION_CONFIG.staggerItem}>
               <a
                 href={link.url}
                 target="_blank"
