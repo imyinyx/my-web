@@ -9,7 +9,7 @@ export const PERSONAL_INFO = {
   email: '3034003373@qq.com',
   avatar: './avator.jpg',
   copyright: 'Yuxing Yin',
-  icp: '鄂ICP备xxxxxxxx号'
+  icp: '鄂ICP备2025096609号'
 }
 
 // 社交媒体链接
